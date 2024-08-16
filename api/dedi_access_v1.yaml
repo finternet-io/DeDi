@@ -1,0 +1,519 @@
+openapi: 3.0.3
+info:
+  title: dedi
+  description: Decentralized Directory - Access
+  contact:
+    name: Dhiway Networks
+    email: info@dhiway.com
+    url: https://dhiway.com
+  license:
+    name: Apache 2.0
+  version: 0.1.0
+paths:
+  /dedi/lookup/{directory-id}:
+    get:
+      tags:
+      - "Lookup API"
+      description: "Get the latest details of the directory"
+      operationId: "getDirectoryDetails"
+      parameters:
+      -
+        in: "path"
+        name: "directory-id"
+        schema:
+          type: "string"
+        required: true
+        description: "Directory ID"
+      responses:
+        200:
+          description: 'Successful response'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DirectoryLookup"
+        401:
+          description: 'Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401Response"
+        404:
+          description: 'Directory Not found'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404Response"
+        423:
+          description: 'Locked'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/423Response"
+        451:
+          description: 'Unavailable for legal reasons'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/451Response"
+
+  /dedi/lookup/{directory-id}/{record-id}:
+    get:
+      tags:
+      - "Lookup API"
+      description: "Get the details of the record inside of the directory"
+      operationId: "getRecordDetails"
+      parameters:
+      -
+        in: "path"
+        name: "directory-id"
+        schema:
+          type: "string"
+        required: true
+        description: "Directory ID"
+      -
+        in: "path"
+        name: "record-id"
+        schema:
+          type: "string"
+        required: true
+        description: "Record ID"
+      responses:
+        200:
+          description: "Record Found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordLookup"
+        401:
+          description: 'Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401Response"
+        404:
+          description: 'Record Not found'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404Response"
+        423:
+          description: 'Locked'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/423Response"
+        451:
+          description: 'Not available for legal reasons'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/451Response"
+
+  /dedi/query/{directory-id}:
+    get:
+      tags:
+      - "Query API"
+      description: "Get the records matching the directory"
+      operationId: "queryDirectory"
+      parameters:
+      -
+        in: "path"
+        name: "directory-id"
+        schema:
+          type: "string"
+        required: true
+        description: "Directory ID"
+      - name: from
+        in: query
+        description: Filter by date. Default is directory created_at
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        description: Filter by date. Default is 'now'
+        schema:
+          type: string
+          format: date
+      - name: status
+        in: query
+        description: Filter by status.
+        schema:
+          type: string
+      - name: name
+        in: query
+        description: Filter by name. The match will happen with 'Like' operator. Minimum 3 letters, otherwise ignored.
+        schema:
+          type: string
+      - name: sort
+        in: query
+        description: Sort the results by a specified field (asc)
+        schema:
+          type: string
+          enum:
+            - date
+            - status
+            - name
+            - id
+      - name: page
+        in: query
+        description: Used in pagination. Default is 0 (ie, first page) from latest updated.
+        schema:
+          type: number
+      - name: page_size
+        in: query
+        description: Record payload length in each get call. Default is 100.
+        schema:
+          type: number
+      responses:
+        200:
+          description: "Records Found in Directory"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DirectoryQuery"
+        204:
+          description: "Directory exists but No Records Found matching query"
+          content:
+            application/json:
+              schema:
+                type: object
+        400:
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/400Response"
+        401:
+          description: 'Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401Response"
+        402:
+          description: 'Payment Required'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/402Response"
+        404:
+          description: 'Directory Not found'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404Response"
+        423:
+          description: 'Locked'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/423Response"
+        451:
+          description: 'Not available for legal reasons'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/451Response"
+        501:
+          description: 'Method not implemented'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/501Response"
+
+  /dedi/history/{directory-id}:
+    get:
+      tags:
+      - "MetaData API"
+      description: "Get the details of the directory, contain all details of changes to directory details from the create time, and who did the chagnes"
+      operationId: "getDirectoryHistory"
+      parameters:
+      -
+        in: "path"
+        name: "directory-id"
+        schema:
+          type: "string"
+        required: true
+        description: "Directory ID"
+      - name: from
+        in: query
+        description: Filter by date. Default is directory created_at
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        description: Filter by date. Default is 'now'
+        schema:
+          type: string
+          format: date
+      responses:
+        200:
+          description: "Successful in getting history"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DirectoryHistoryLookup"
+        401:
+          description: 'Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401Response"
+        404:
+          description: 'Directory Not found'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404Response"
+        423:
+          description: 'Locked'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/423Response"
+        451:
+          description: 'Not available for legal reasons'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/451Response"
+        501:
+          description: 'Method not implemented'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/501Response"
+
+  /dedi/history/{directory-id}/{record-id}:
+    get:
+      tags:
+      - "MetaData API"
+      description: "Get the historic details of the record inside of the directory"
+      operationId: "getRecordHistory"
+      parameters:
+      -
+        in: "path"
+        name: "directory-id"
+        schema:
+          type: "string"
+        required: true
+        description: "Directory ID"
+      -
+        in: "path"
+        name: "record-id"
+        schema:
+          type: "string"
+        required: true
+        description: "Record ID"
+      - name: from
+        in: query
+        description: Filter by date. Default is directory created_at
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        description: Filter by date. Default is 'now'
+        schema:
+          type: string
+          format: date
+      responses:
+        200:
+          description: "Successful in getting history"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordHistoryLookup"
+        401:
+          description: 'Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401Response"
+        404:
+          description: 'Directory (or Record) Not found'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404Response"
+        423:
+          description: 'Locked'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/423Response"
+        451:
+          description: 'Not available for legal reasons'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/451Response"
+        501:
+          description: 'Method not implemented'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/501Response"
+
+components:
+  schemas:
+    DirectoryLookup:
+      type: object
+      description: "Directory Lookup"
+      properties:
+        description:
+          type: string
+        owner:
+          type: string
+        schema:
+          type: object
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        record_count:
+          type: number
+          
+      required:
+        - description
+        - owner
+        - schema
+        - created_at
+        - updated_at
+
+    DirectoryQuery:
+      type: object
+      description: "Directory Query"
+      properties:
+        owner:
+          type: string
+        schema:
+          type: object
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        total_records:
+          type: number
+        records:
+          type: array
+          items:
+            type: object
+        page:
+          type: number
+        page_size:
+          type: number
+      required:
+        - description
+        - owner
+        - schema
+        - created_at
+        - updated_at
+
+    DirectoryHistoryLookup:
+      type: object
+      description: "Directory History"
+      properties:
+        description:
+          type: string
+        owner:
+          type: string
+        schema:
+          type: object
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        record_count:
+          type: number
+        history:
+          type: object
+
+
+    RecordLookup:
+      type: object
+      description: "Record Lookup"
+      properties:
+        description:
+          type: string
+        schema:
+          type: object
+          description: "Schema of this record (as per the directory) in property name as key, and data type as value"
+        details:
+          description: "Object in key value pairs in the dictionary based on schema"
+          type: object
+        created_at:
+          type: string
+        created_by:
+          type: string
+      required:
+        - description
+        - details
+        - created_at
+        - created_by
+  
+    RecordHistoryLookup:
+      type: object
+      description: "Record History"
+      properties:
+        description:
+          type: string
+        details:
+          type: string
+        created_at:
+          type: string
+        created_by:
+          type: string
+        history:
+          type: object
+  
+    400Response:
+      type: object
+      description: "Bad Request"
+      properties:
+        error:
+          type: string
+          example: "Query Parameters not well formatted"
+    401Response:
+      type: object
+      description: "Unauthorized. May not be applicable in case of Public directory, but applicable in case of private directories."
+      properties:
+        description:
+          type: string
+          example: "This call doesn't contain required Authorization details"
+    402Response:
+      type: object
+      description: "Payment Required. May not be applicable in case of a public directory, but service provider can provide payment feature to access verification"
+      properties:
+        error:
+          type: string
+          example: "Payment details required to access the details"
+    404Response:
+      type: object
+      description: "Object not found"
+      properties:
+        error:
+          type: string
+          example: "{directory_id} not found"
+    423Response:
+      type: object
+      description: "Locked"
+      properties:
+        error:
+          type: string
+          example: "Locked by the Directory Owner. Contact owner for further details."
+    451Response:
+      type: object
+      description: "Unavailable for Legal Reasons"
+      properties:
+        error:
+          type: string
+          example: "Data not resolved due to legal reasons. Contact owner for further details."
+    501Response:
+      type: object
+      description: "Method Not Implemented"
+      properties:
+        description:
+          type: string
+          example: "The call is not implemented. Check with service provider."
