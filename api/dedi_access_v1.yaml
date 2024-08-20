@@ -10,7 +10,7 @@ info:
     name: Apache 2.0
   version: 0.1.0
 paths:
-  /dedi/lookup/{directory-id}:
+  /dedi/lookup/{namespace}/{directory-name}:
     get:
       tags:
       - "Lookup API"
@@ -19,11 +19,24 @@ paths:
       parameters:
       -
         in: "path"
-        name: "directory-id"
+        name: "namespace"
         schema:
           type: "string"
         required: true
-        description: "Directory ID"
+        description: "Namespace (Can be Unique ID of the namespace)"
+      -
+        in: "path"
+        name: "directory-name"
+        schema:
+          type: "string"
+        required: true
+        description: "Directory Name (Can be Unique ID too)"
+      - name: "version-id"
+        in: query
+        description: Version-ID of the particular directory. Default is null, in which case, lastest is responded.
+        schema:
+          type: string
+
       responses:
         200:
           description: 'Successful response'
@@ -56,7 +69,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/451Response"
 
-  /dedi/lookup/{directory-id}/{record-id}:
+  /dedi/lookup/{namespace}/{directory-name}/{record-name}:
     get:
       tags:
       - "Lookup API"
@@ -65,18 +78,31 @@ paths:
       parameters:
       -
         in: "path"
-        name: "directory-id"
+        name: "namespace"
         schema:
           type: "string"
         required: true
-        description: "Directory ID"
+        description: "Namespace (Can be Unique ID of the namespace)"
       -
         in: "path"
-        name: "record-id"
+        name: "directory-name"
         schema:
           type: "string"
         required: true
-        description: "Record ID"
+        description: "Directory Name"
+      -
+        in: "path"
+        name: "record-name"
+        schema:
+          type: "string"
+        required: true
+        description: "Record Name"
+      - name: "version-id"
+        in: query
+        description: Version-ID of the particular record. Default is null, in which case, lastest is responded.
+        schema:
+          type: string
+
       responses:
         200:
           description: "Record Found"
@@ -109,7 +135,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/451Response"
 
-  /dedi/query/{directory-id}:
+  /dedi/query/{namespace}/{directory-name}:
     get:
       tags:
       - "Query API"
@@ -118,11 +144,23 @@ paths:
       parameters:
       -
         in: "path"
-        name: "directory-id"
+        name: "namespace"
         schema:
           type: "string"
         required: true
-        description: "Directory ID"
+        description: "Namespace (Can be Unique ID of the namespace)"
+      -
+        in: "path"
+        name: "directory-name"
+        schema:
+          type: "string"
+        required: true
+        description: "Directory Name (Can be Unique Id too)"
+      - name: "version-id"
+        in: query
+        description: Version-ID of the particular directory. Default is null, in which case, lastest is responded.
+        schema:
+          type: string
       - name: from
         in: query
         description: Filter by date. Default is directory created_at
@@ -221,7 +259,114 @@ paths:
               schema:
                 $ref: "#/components/schemas/501Response"
 
-  /dedi/history/{directory-id}:
+  /dedi/versions/{namespace}/{directory-name}:
+    get:
+      tags:
+      - "Version List API"
+      description: "Get the available versions of the directory."
+      operationId: "versionDirectory"
+      parameters:
+      -
+        in: "path"
+        name: "namespace"
+        schema:
+          type: "string"
+        required: true
+        description: "Namespace (Can be Unique ID of the namespace)"
+      -
+        in: "path"
+        name: "directory-name"
+        schema:
+          type: "string"
+        required: true
+        description: "Directory Name (Can be Unique Id too)"
+      - name: from
+        in: query
+        description: Filter by date. Default is directory created_at
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        description: Filter by date. Default is 'now'
+        schema:
+          type: string
+          format: date
+      - name: sort
+        in: query
+        description: Sort the results by a specified field (asc)
+        schema:
+          type: string
+          enum:
+            - date
+            - id
+      - name: page
+        in: query
+        description: Used in pagination. Default is 0 (ie, first page) from latest updated.
+        schema:
+          type: number
+      - name: page_size
+        in: query
+        description: Record payload length in each get call. Default is 100.
+        schema:
+          type: number
+      responses:
+        200:
+          description: "Records Found in Directory"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DirectoryVersion"
+        204:
+          description: "Directory exists but No Records Found matching query"
+          content:
+            application/json:
+              schema:
+                type: object
+        400:
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/400Response"
+        401:
+          description: 'Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401Response"
+        402:
+          description: 'Payment Required'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/402Response"
+        404:
+          description: 'Directory Not found'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404Response"
+        423:
+          description: 'Locked'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/423Response"
+        451:
+          description: 'Not available for legal reasons'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/451Response"
+        501:
+          description: 'Method not implemented'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/501Response"
+
+  /dedi/history/{namespace}/{directory-name}:
     get:
       tags:
       - "MetaData API"
@@ -230,14 +375,26 @@ paths:
       parameters:
       -
         in: "path"
-        name: "directory-id"
+        name: "namespace"
         schema:
           type: "string"
         required: true
-        description: "Directory ID"
+        description: "Namespace (Can be Unique ID of the namespace)"
+      -
+        in: "path"
+        name: "directory-name"
+        schema:
+          type: "string"
+        required: true
+        description: "Directory Name"
+      - name: "version-id"
+        in: query
+        description: Version-ID of the particular directory. Default is null, in which case, lastest is responded.
+        schema:
+          type: string
       - name: from
         in: query
-        description: Filter by date. Default is directory created_at
+        description: Filter by date. Default is directory created_at date
         schema:
           type: string
           format: date
@@ -285,7 +442,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/501Response"
 
-  /dedi/history/{directory-id}/{record-id}:
+  /dedi/history/{namespace}/{directory-name}/{record-name}:
     get:
       tags:
       - "MetaData API"
@@ -294,18 +451,25 @@ paths:
       parameters:
       -
         in: "path"
-        name: "directory-id"
+        name: "namespace"
         schema:
           type: "string"
         required: true
-        description: "Directory ID"
+        description: "Namespace (Can be Unique ID of the namespace)"
       -
         in: "path"
-        name: "record-id"
+        name: "directory-name"
         schema:
           type: "string"
         required: true
-        description: "Record ID"
+        description: "Directory Name"
+      -
+        in: "path"
+        name: "record-name"
+        schema:
+          type: "string"
+        required: true
+        description: "Record Name"
       - name: from
         in: query
         description: Filter by date. Default is directory created_at
@@ -362,9 +526,11 @@ components:
       type: object
       description: "Directory Lookup"
       properties:
+        namespace:
+          type: string
         description:
           type: string
-        owner:
+        created_by:
           type: string
         schema:
           type: object
@@ -374,10 +540,16 @@ components:
           type: string
         record_count:
           type: number
+        version_count:
+          type: number
+        query_allowed:
+          type: boolean
+          description: "only lookup allowed"
+          
           
       required:
         - description
-        - owner
+        - created_by
         - schema
         - created_at
         - updated_at
@@ -386,7 +558,7 @@ components:
       type: object
       description: "Directory Query"
       properties:
-        owner:
+        created_by:
           type: string
         schema:
           type: object
@@ -405,19 +577,46 @@ components:
         page_size:
           type: number
       required:
-        - description
-        - owner
+        - created_by
         - schema
         - created_at
         - updated_at
+
+
+    DirectoryVersion:
+      type: object
+      description: "Directory Version List"
+      properties:
+        created_by:
+          type: string
+        schema:
+          type: object
+        created_at:
+          type: string
+        total_versions:
+          type: number
+        versions:
+          type: array
+          items:
+            type: object
+        page:
+          type: number
+        page_size:
+          type: number
+      required:
+        - created_by
+        - schema
+        - created_at
 
     DirectoryHistoryLookup:
       type: object
       description: "Directory History"
       properties:
+        namespace:
+          type: string
         description:
           type: string
-        owner:
+        created_by:
           type: string
         schema:
           type: object
@@ -428,13 +627,16 @@ components:
         record_count:
           type: number
         history:
-          type: object
-
+          type: array
+          items:
+            type: object
 
     RecordLookup:
       type: object
       description: "Record Lookup"
       properties:
+        namespace:
+          type: string
         description:
           type: string
         schema:
@@ -502,14 +704,14 @@ components:
       properties:
         error:
           type: string
-          example: "Locked by the Directory Owner. Contact owner for further details."
+          example: "Locked by the Directory Creator. Contact Maintainer for further details."
     451Response:
       type: object
       description: "Unavailable for Legal Reasons"
       properties:
         error:
           type: string
-          example: "Data not resolved due to legal reasons. Contact owner for further details."
+          example: "Data not resolved due to legal reasons. Contact Maintainer for further details."
     501Response:
       type: object
       description: "Method Not Implemented"
