@@ -1,0 +1,35 @@
+{
+    "$id": "https://dedi.global/public_key.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Public Key Directory",
+    "description": "This schema is used to get public key details from the public directory for a given entity",
+    "type": "object",
+    "properties": {
+	"id": {
+	    "type": "string",
+	    "description": "Unique ID of the entity"
+	},
+	"active": {
+	    "type": "string",
+	    "description": "currently active public key"
+	},
+	"entity": {
+	    "type": "object",
+	    "description": "Public details of the entity"
+	    "properties": {
+		"name": { "type": "string" },
+		"url": { "type": "string", "format": "url"},
+		"address": { "type": "string" },
+	    },
+	    "required": ["name"],
+	    "additionalProperties": true,
+	},
+	"previousKeys": {
+	    "type": "array",
+	    "items": {
+		"type": "string"
+	    }
+	}
+    },
+    "required": [ "id", "active"]
+}
