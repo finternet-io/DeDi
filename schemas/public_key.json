@@ -9,10 +9,18 @@
 	    "type": "string",
 	    "description": "Unique ID of the entity"
 	},
-	"active": {
+	"publicKey": {
 	    "type": "string",
 	    "description": "currently active public key"
 	},
+	"keyType": {
+	    "type": "string",
+	    "description": "RSA2048, Edcsa, ed25519",
+	}
+	"keyFormat": {
+	    "type": "string",
+	    "description": "base58, base64, hex, x.509 etc etc",
+	}
 	"entity": {
 	    "type": "object",
 	    "description": "Public details of the entity"
@@ -27,9 +35,21 @@
 	"previousKeys": {
 	    "type": "array",
 	    "items": {
-		"type": "string"
+		"type": "object",
+		"properties": {
+		    "publicKey": {
+			"type": "string"
+		    },
+		    "keyType": {
+			"type": "string"
+		    },
+		    "keyFormat": {
+			"type": "string"
+		    }
+		},
+		"additionalProperties": true
 	    }
 	}
     },
-    "required": [ "id", "active"]
+    "required": [ "id", "publicKey", "keyType"]
 }
