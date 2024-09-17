@@ -3,14 +3,42 @@ info:
   title: dedi
   description: Decentralized Directory - Access
   contact:
-    name: Dhiway Networks
-    email: info@dhiway.com
+    name: Dhiway
+    email: finternet@dhiway.com
     url: https://dhiway.com
   license:
     name: Apache 2.0
-  version: 0.1.0
+  version: 0.1.1
 paths:
-  /dedi/lookup/{namespace}/{directory-name}:
+  /dedi/lookup/{namespace}:
+    get:
+      tags:
+      - "Lookup API"
+      description: "Get the latest details of the namespace. Generally, namespace is for 'Account' of the entity, and its public key is mentioned. Can have details of website/URL for proving more trust."
+      operationId: "getNamespaceDetails"
+      parameters:
+      -
+        in: "path"
+        name: "namespace"
+        schema:
+          type: "string"
+        required: true
+        description: "Namespace reference. Can be Unique ID of the namespace, or the name"
+      responses:
+        200: 
+          description: 'Successful response'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NamespaceLookup" 
+        404:
+          description: 'Namespace Not found'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404Response"
+ 
+  /dedi/lookup/{namespace}/{directory}:
     get:
       tags:
       - "Lookup API"
@@ -23,17 +51,17 @@ paths:
         schema:
           type: "string"
         required: true
-        description: "Namespace (Can be Unique ID of the namespace)"
+        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID"
       -
         in: "path"
-        name: "directory-name"
+        name: "directory"
         schema:
           type: "string"
         required: true
-        description: "Directory Name (Can be Unique ID too)"
-      - name: "version-id"
+        description: "Directory ID or Name, depending on the implementation. ID of directory should be always unique, but name should be unique just inside the namespace"
+      - name: "version"
         in: query
-        description: Version-ID of the particular directory. Default is null, in which case, lastest is responded.
+        description: Version of the particular directory. Default is null, in which case, lastest is responded.
         schema:
           type: string
 
@@ -69,7 +97,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/451Response"
 
-  /dedi/lookup/{namespace}/{directory-name}/{record-name}:
+  /dedi/lookup/{namespace}/{directory}/{record}:
     get:
       tags:
       - "Lookup API"
@@ -82,24 +110,24 @@ paths:
         schema:
           type: "string"
         required: true
-        description: "Namespace (Can be Unique ID of the namespace)"
+        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID"
       -
         in: "path"
-        name: "directory-name"
+        name: "directory"
         schema:
           type: "string"
         required: true
-        description: "Directory Name"
+        description: "Directory ID or Name, depending on the implementation. ID of directory should be always unique, but name should be unique just inside the namespace"
       -
         in: "path"
-        name: "record-name"
+        name: "record"
         schema:
           type: "string"
         required: true
-        description: "Record Name"
-      - name: "version-id"
+        description: "Record Name or ID. Record ID is always unique, but record name can be unique inside the given directory"
+      - name: "version"
         in: query
-        description: Version-ID of the particular record. Default is null, in which case, lastest is responded.
+        description: Version of the particular record. Default is null, in which case, lastest is responded.
         schema:
           type: string
 
@@ -135,7 +163,118 @@ paths:
               schema:
                 $ref: "#/components/schemas/451Response"
 
-  /dedi/query/{namespace}/{directory-name}:
+  /dedi/query/{namespace}:
+    get:
+      tags:
+      - "Query API"
+      description: "Get the directories inside the given namespace"
+      operationId: "queryNamespace"
+      parameters:
+      -
+        in: "path"
+        name: "namespace"
+        schema:
+          type: "string"
+        required: true
+        description: "Namespace ID or name"
+      - name: from
+        in: query
+        description: Filter by date. Default is directory created_at
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        description: Filter by date. Default is 'now'
+        schema:
+          type: string
+          format: date
+      - name: status
+        in: query
+        description: Filter by status.
+        schema:
+          type: string
+      - name: name
+        in: query
+        description: Filter by name. The match will happen with 'Like' operator. Minimum 3 letters, otherwise ignored.
+        schema:
+          type: string
+      - name: sort
+        in: query
+        description: Sort the results by a specified field (asc)
+        schema:
+          type: string
+          enum:
+            - date
+            - status
+            - name
+            - id
+      - name: page
+        in: query
+        description: Used in pagination. Default is 0 (ie, first page) from latest updated.
+        schema:
+          type: number
+      - name: page_size
+        in: query
+        description: Record payload length in each get call. Default is 100.
+        schema:
+          type: number
+      responses:
+        200:
+          description: "Directory Found in Namespace"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NamespaceQuery"
+        204:
+          description: "Namespace exists but No Directories Found matching query"
+          content:
+            application/json:
+              schema:
+                type: object
+        400:
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/400Response"
+        401:
+          description: 'Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401Response"
+        402:
+          description: 'Payment Required'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/402Response"
+        404:
+          description: 'Directory Not found'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404Response"
+        423:
+          description: 'Locked'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/423Response"
+        451:
+          description: 'Not available for legal reasons'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/451Response"
+        501:
+          description: 'Method not implemented'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/501Response"
+  /dedi/query/{namespace}/{directory}:
     get:
       tags:
       - "Query API"
@@ -151,14 +290,14 @@ paths:
         description: "Namespace (Can be Unique ID of the namespace)"
       -
         in: "path"
-        name: "directory-name"
+        name: "directory"
         schema:
           type: "string"
         required: true
-        description: "Directory Name (Can be Unique Id too)"
-      - name: "version-id"
+        description: "Directory. Can be Unique Id or the alias."
+      - name: "version"
         in: query
-        description: Version-ID of the particular directory. Default is null, in which case, lastest is responded.
+        description: Version of the particular directory. Default is null, in which case, lastest is responded.
         schema:
           type: string
       - name: from
@@ -259,7 +398,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/501Response"
 
-  /dedi/versions/{namespace}/{directory-name}:
+  /dedi/versions/{namespace}/{directory}:
     get:
       tags:
       - "Version List API"
@@ -275,11 +414,11 @@ paths:
         description: "Namespace (Can be Unique ID of the namespace)"
       -
         in: "path"
-        name: "directory-name"
+        name: "directory"
         schema:
           type: "string"
         required: true
-        description: "Directory Name (Can be Unique Id too)"
+        description: "Directory Name or ID"
       - name: from
         in: query
         description: Filter by date. Default is directory created_at
@@ -522,11 +661,36 @@ paths:
 
 components:
   schemas:
+    NamespaceLookup:
+      type: object
+      description: "Namespace Lookup"
+      properties:
+        namespace:
+          type: string
+        namespace_id:
+          type: string
+        description:
+          type: string
+        created_by:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        directory_count:
+          type: number
+
     DirectoryLookup:
       type: object
       description: "Directory Lookup"
       properties:
         namespace:
+          type: string
+        namespace_id:
+          type: string
+        directory_id:
+          type: string
+        directory_name:
           type: string
         description:
           type: string
@@ -549,6 +713,32 @@ components:
           
       required:
         - description
+        - created_by
+        - schema
+        - created_at
+        - updated_at
+
+    NamespaceQuery:
+      type: object
+      description: "Namespace Query"
+      properties:
+        created_by:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        total_directories:
+          type: number
+        directories:
+          type: array
+          items:
+            type: object
+        page:
+          type: number
+        page_size:
+          type: number
+      required:
         - created_by
         - schema
         - created_at
@@ -612,7 +802,9 @@ components:
       type: object
       description: "Directory History"
       properties:
-        namespace:
+        namespace_id:
+          type: string
+        namespace_name:
           type: string
         description:
           type: string
@@ -637,6 +829,16 @@ components:
       properties:
         namespace:
           type: string
+        namespace_id:
+          type: string
+        directory_id:
+          type: string
+        directory_name:
+          type: string
+        record_id:
+          type: string
+        record_name:
+          type: string
         description:
           type: string
         schema:
@@ -647,10 +849,12 @@ components:
           type: object
         created_at:
           type: string
+        last_updated_at:
+          type: string
         created_by:
           type: string
       required:
-        - description
+        - record_id
         - details
         - created_at
         - created_by
