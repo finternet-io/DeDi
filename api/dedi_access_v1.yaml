@@ -1,14 +1,17 @@
 openapi: 3.0.3
 info:
-  title: dedi
-  description: Decentralized Directory - Access
+  title: DeDi - Decentralized Directory
+  description: Decentralized Directory - Access APIs
   contact:
-    name: Dhiway
-    email: finternet@dhiway.com
-    url: https://dhiway.com
+    name: Finternet Team
+    url: https://finternetlab.io
   license:
     name: Apache 2.0
-  version: 0.1.1
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.1.2
+servers:
+- url: https://lookup.dedi.global/
+  description: Development server
 paths:
   /dedi/lookup/{namespace}:
     get:
@@ -505,7 +508,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/501Response"
 
-  /dedi/history/{namespace}/{directory-name}:
+  /dedi/history/{namespace}/{directory}:
     get:
       tags:
       - "MetaData API"
@@ -521,14 +524,14 @@ paths:
         description: "Namespace (Can be Unique ID of the namespace)"
       -
         in: "path"
-        name: "directory-name"
+        name: "directory"
         schema:
           type: "string"
         required: true
-        description: "Directory Name"
-      - name: "version-id"
+        description: "Directory Name or ID"
+      - name: "version"
         in: query
-        description: Version-ID of the particular directory. Default is null, in which case, lastest is responded.
+        description: Version of the particular directory. Default is null, in which case, lastest is responded.
         schema:
           type: string
       - name: from
@@ -581,7 +584,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/501Response"
 
-  /dedi/history/{namespace}/{directory-name}/{record-name}:
+  /dedi/history/{namespace}/{directory}/{record}:
     get:
       tags:
       - "MetaData API"
@@ -597,18 +600,18 @@ paths:
         description: "Namespace (Can be Unique ID of the namespace)"
       -
         in: "path"
-        name: "directory-name"
+        name: "directory"
         schema:
           type: "string"
         required: true
-        description: "Directory Name"
+        description: "Directory Name or ID"
       -
         in: "path"
-        name: "record-name"
+        name: "record"
         schema:
           type: "string"
         required: true
-        description: "Record Name"
+        description: "Record Name or ID"
       - name: from
         in: query
         description: Filter by date. Default is directory created_at
@@ -669,6 +672,8 @@ components:
           type: string
         namespace_id:
           type: string
+        digest:
+          type: string
         description:
           type: string
         created_by:
@@ -692,6 +697,8 @@ components:
           type: string
         directory_name:
           type: string
+        digest:
+          type: string
         description:
           type: string
         created_by:
@@ -709,10 +716,9 @@ components:
         query_allowed:
           type: boolean
           description: "only lookup allowed"
-          
-          
       required:
-        - description
+        - directory_id
+        - digest
         - created_by
         - schema
         - created_at
@@ -740,9 +746,11 @@ components:
           type: number
       required:
         - created_by
+        - digest
         - schema
         - created_at
         - updated_at
+        - directories
 
     DirectoryQuery:
       type: object
@@ -771,6 +779,7 @@ components:
         - schema
         - created_at
         - updated_at
+        - records
 
 
     DirectoryVersion:
@@ -797,6 +806,7 @@ components:
         - created_by
         - schema
         - created_at
+        - versions
 
     DirectoryHistoryLookup:
       type: object
@@ -838,6 +848,8 @@ components:
         record_id:
           type: string
         record_name:
+          type: string
+        digest:
           type: string
         description:
           type: string
@@ -901,7 +913,7 @@ components:
       properties:
         error:
           type: string
-          example: "{directory_id} not found"
+          example: "{directory} not found"
     423Response:
       type: object
       description: "Locked"
