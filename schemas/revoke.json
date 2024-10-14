@@ -1,0 +1,18 @@
+{
+    "$id": "https://dedi.global/revoke.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Revoke or Negative List"
+    "description": "Revocation List. This schema is used to represent anything which is revoked/blacklisted aka, negative list. Examples are blacklisted entities in a country, no-fly list, list of credentials revoked from the issuance in an university",
+    "type": "object",
+    "properties": {
+	"id": {
+	    "type": "string",
+	    "description": "Unique ID which is getting revoked"
+	},
+	"reason": {
+	    "description": "Reason for revocation / blacklisting",
+	    "type": "string"
+	},
+    },
+    "required": [ "id"]
+}
