@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: DeDi - Decentralized Directory
+  title: DeDi - Decentralized Directory Protocol
   description: Decentralized Directory - Access APIs
   contact:
     name: Finternet Team
@@ -11,7 +11,7 @@ info:
   version: 0.1.2
 servers:
 - url: https://lookup.dedi.global/
-  description: Development server
+  description: Development and Sandbox server
 paths:
   /dedi/lookup/{namespace}:
     get:
@@ -54,7 +54,7 @@ paths:
         schema:
           type: "string"
         required: true
-        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID"
+        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID."
       -
         in: "path"
         name: "directory"
@@ -64,7 +64,7 @@ paths:
         description: "Directory ID or Name, depending on the implementation. ID of directory should be always unique, but name should be unique just inside the namespace"
       - name: "version"
         in: query
-        description: Version of the particular directory. Default is null, in which case, lastest is responded.
+        description: Version of the particular directory. Default is null, in which case, latest is responded.
         schema:
           type: string
 
@@ -127,7 +127,7 @@ paths:
         schema:
           type: "string"
         required: true
-        description: "Record Name or ID. Record ID is always unique, but record name can be unique inside the given directory"
+        description: "Record Name or ID. Record ID is always unique, but record name can be unique inside the given directory."
       - name: "version"
         in: query
         description: Version of the particular record. Default is null, in which case, lastest is responded.
@@ -179,7 +179,7 @@ paths:
         schema:
           type: "string"
         required: true
-        description: "Namespace ID or name"
+        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID"
       - name: from
         in: query
         description: Filter by date. Default is directory created_at
@@ -194,7 +194,7 @@ paths:
           format: date
       - name: status
         in: query
-        description: Filter by status.
+        description: Filter by status. Default status list - active, revoke, archive
         schema:
           type: string
       - name: name
@@ -214,7 +214,7 @@ paths:
             - id
       - name: page
         in: query
-        description: Used in pagination. Default is 0 (ie, first page) from latest updated.
+        description: Used in pagination. Default is 0 (i.e. first page) from latest updated.
         schema:
           type: number
       - name: page_size
@@ -224,7 +224,7 @@ paths:
           type: number
       responses:
         200:
-          description: "Directory Found in Namespace"
+          description: "Directories Found in Namespace"
           content:
             application/json:
               schema:
@@ -281,7 +281,7 @@ paths:
     get:
       tags:
       - "Query API"
-      description: "Get the records matching the directory"
+      description: "Get the records matching the query within directory"
       operationId: "queryDirectory"
       parameters:
       -
@@ -290,14 +290,14 @@ paths:
         schema:
           type: "string"
         required: true
-        description: "Namespace (Can be Unique ID of the namespace)"
+        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID"
       -
         in: "path"
         name: "directory"
         schema:
           type: "string"
         required: true
-        description: "Directory. Can be Unique Id or the alias."
+        description: "Directory ID or Name. Unique ID of the directory. Name can be an alias to ID"
       - name: "version"
         in: query
         description: Version of the particular directory. Default is null, in which case, lastest is responded.
@@ -305,7 +305,7 @@ paths:
           type: string
       - name: from
         in: query
-        description: Filter by date. Default is directory created_at
+        description: Filter by date. Default is record created_at
         schema:
           type: string
           format: date
@@ -317,7 +317,7 @@ paths:
           format: date
       - name: status
         in: query
-        description: Filter by status.
+        description: Filter by status. Default status list - active, revoke, archive
         schema:
           type: string
       - name: name
@@ -414,14 +414,14 @@ paths:
         schema:
           type: "string"
         required: true
-        description: "Namespace (Can be Unique ID of the namespace)"
+        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID"
       -
         in: "path"
         name: "directory"
         schema:
           type: "string"
         required: true
-        description: "Directory Name or ID"
+        description: "Directory ID or Name. Unique ID of the directory. Name can be an alias to ID"
       - name: from
         in: query
         description: Filter by date. Default is directory created_at
@@ -512,7 +512,7 @@ paths:
     get:
       tags:
       - "MetaData API"
-      description: "Get the details of the directory, contain all details of changes to directory details from the create time, and who did the chagnes"
+      description: "Get the change log of the directory, containing information about changes to directory details from the creation time along with who did the chagnes"
       operationId: "getDirectoryHistory"
       parameters:
       -
@@ -521,14 +521,14 @@ paths:
         schema:
           type: "string"
         required: true
-        description: "Namespace (Can be Unique ID of the namespace)"
+        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID"
       -
         in: "path"
         name: "directory"
         schema:
           type: "string"
         required: true
-        description: "Directory Name or ID"
+        description: "Directory ID or Name. Unique ID of the directory. Name can be an alias to ID"
       - name: "version"
         in: query
         description: Version of the particular directory. Default is null, in which case, lastest is responded.
@@ -588,7 +588,7 @@ paths:
     get:
       tags:
       - "MetaData API"
-      description: "Get the historic details of the record inside of the directory"
+      description: "Get the historic details of the record along with authorship"
       operationId: "getRecordHistory"
       parameters:
       -
@@ -597,21 +597,21 @@ paths:
         schema:
           type: "string"
         required: true
-        description: "Namespace (Can be Unique ID of the namespace)"
+        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID"
       -
         in: "path"
         name: "directory"
         schema:
           type: "string"
         required: true
-        description: "Directory Name or ID"
+        description: "Directory ID or Name. Unique ID of the directory. Name can be an alias to ID"
       -
         in: "path"
         name: "record"
         schema:
           type: "string"
         required: true
-        description: "Record Name or ID"
+        description: "Record ID or Name. Unique ID of the record. Name can be an alias to ID"
       - name: from
         in: query
         description: Filter by date. Default is directory created_at
@@ -638,7 +638,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/401Response"
         404:
-          description: 'Directory (or Record) Not found'
+          description: 'Directory or Record Not found'
           content:
             application/json:
               schema:
