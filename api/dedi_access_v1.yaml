@@ -10,928 +10,1191 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   version: 0.1.2
 servers:
-- url: https://lookup.dedi.global/
-  description: Development and Sandbox server
+  - url: https://sandbox.dedi.global
+    description: Sandbox
+  - url: https://beta.dedi.global
+    description: Beta
+  - url: https://dev.dedi.global
+    description: Dev
+  - url: http://localhost:5106
+    description: Localhost
 paths:
   /dedi/lookup/{namespace}:
     get:
       tags:
-      - "Lookup API"
-      description: "Get the latest details of the namespace. Generally, namespace is for 'Account' of the entity, and its public key is mentioned. Can have details of website/URL for proving more trust."
-      operationId: "getNamespaceDetails"
+        - Lookup API
+      summary: Get namespace details
+      description: Fetches the latest or specific version details of a namespace. Namespace can be the unique ID or a verified domain.
+      operationId: getNamespaceDetails
       parameters:
-      -
-        in: "path"
-        name: "namespace"
-        schema:
-          type: "string"
-        required: true
-        description: "Namespace reference. Can be Unique ID of the namespace, or the name"
+        - in: path
+          name: namespace
+          schema:
+            type: string
+          required: true
+          description: Namespace reference - Unique ID or verified domain
+        - in: query
+          name: version_id
+          schema:
+            type: string
+          required: false
+          description: Optional version ID to fetch a specific version of the namespace
       responses:
-        200: 
-          description: 'Successful response'
+        '200':
+          description: Namespace details retrieved successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NamespaceLookup" 
-        404:
-          description: 'Namespace Not found'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Namespace details retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      namespace_id:
+                        type: string
+                      digest:
+                        type: string
+                      description:
+                        type: string
+                      created_by:
+                        type: string
+                      genesis:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      version_count:
+                        type: string
+                      version:
+                        type: string
+                      meta:
+                        type: object
+                      registry_count:
+                        type: string
+                      ttl:
+                        type: string
+        '400':
+          description: 'Invalid input: namespace is missing'
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/404Response"
- 
-  /dedi/lookup/{namespace}/{directory}:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Invalid input: namespace is missing'
+                  data:
+                    type: string
+                    nullable: true
+                    example: null
+        '401':
+          description: Unauthorized - Missing or invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized
+                  data:
+                    type: string
+                    nullable: true
+                    example: null
+        '404':
+          description: Namespace not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: namespace not found
+                  data:
+                    type: string
+                    nullable: true
+                    example: null
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: An unexpected error occurred
+                  data:
+                    type: string
+                    example: Error stack/message here
+  /dedi/lookup/{namespace}/{registry_name}:
     get:
       tags:
-      - "Lookup API"
-      description: "Get the latest details of the directory"
-      operationId: "getDirectoryDetails"
+        - Lookup API
+      summary: Get registry details
+      description: Fetches the latest or specific version details of a registry within a namespace.
+      operationId: getRegistryDetails
       parameters:
-      -
-        in: "path"
-        name: "namespace"
-        schema:
-          type: "string"
-        required: true
-        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID."
-      -
-        in: "path"
-        name: "directory"
-        schema:
-          type: "string"
-        required: true
-        description: "Directory ID or Name, depending on the implementation. ID of directory should be always unique, but name should be unique just inside the namespace"
-      - name: "version"
-        in: query
-        description: Version of the particular directory. Default is null, in which case, latest is responded.
-        schema:
-          type: string
-
+        - in: path
+          name: namespace
+          required: true
+          description: Namespace reference - Unique ID or verified domain
+          schema:
+            type: string
+        - in: path
+          name: registry_name
+          required: true
+          description: Name of the registry (unique within the namespace)
+          schema:
+            type: string
+        - in: query
+          name: version_id
+          required: false
+          description: Version of the registry. If not provided, the latest version is returned.
+          schema:
+            type: string
       responses:
-        200:
-          description: 'Successful response'
+        '200':
+          description: Registry details retrieved successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DirectoryLookup"
-        401:
-          description: 'Unauthorized'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Resource retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      namespace:
+                        type: string
+                      namespace_id:
+                        type: string
+                      registry_id:
+                        type: string
+                      registry_name:
+                        type: string
+                      digest:
+                        type: string
+                      description:
+                        type: string
+                      created_by:
+                        type: string
+                      schema:
+                        type: object
+                      genesis:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      meta:
+                        type: object
+                      record_count:
+                        type: string
+                      version_count:
+                        type: string
+                      version:
+                        type: string
+                      query_allowed:
+                        type: string
+                      is_revoked:
+                        type: boolean
+                      is_archived:
+                        type: boolean
+                      ttl:
+                        type: integer
+                        example: 600
+        '400':
+          description: Bad request due to missing parameters
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/401Response"
-        404:
-          description: 'Directory Not found'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Invalid input: namespace is missing'
+                  data:
+                    type: string
+                    nullable: true
+                    example: null
+        '401':
+          description: Unauthorized - Missing or invalid token
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/404Response"
-        423:
-          description: 'Locked'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized
+                  data:
+                    type: string
+                    nullable: true
+                    example: null
+        '404':
+          description: Namespace or Registry not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/423Response"
-        451:
-          description: 'Unavailable for legal reasons'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Registry not found
+                  data:
+                    type: string
+                    nullable: true
+                    example: null
+        '423':
+          description: Registry is locked
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/451Response"
-
-  /dedi/lookup/{namespace}/{directory}/{record}:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Registry is locked
+                  data:
+                    type: string
+                    nullable: true
+                    example: null
+        '451':
+          description: Registry is unavailable for legal reasons
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Registry is unavailable for legal reasons
+                  data:
+                    type: string
+                    nullable: true
+                    example: null
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: An unexpected error occurred
+                  data:
+                    type: string
+                    example: error.message
+  /dedi/lookup/{namespace}/{registry_name}/{record_name}:
     get:
       tags:
-      - "Lookup API"
-      description: "Get the details of the record inside of the directory"
-      operationId: "getRecordDetails"
+        - Lookup API
+      summary: Get record details
+      description: Fetches the latest or specific version of a record within a registry.
+      operationId: getRecordDetails
       parameters:
-      -
-        in: "path"
-        name: "namespace"
-        schema:
-          type: "string"
-        required: true
-        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID"
-      -
-        in: "path"
-        name: "directory"
-        schema:
-          type: "string"
-        required: true
-        description: "Directory ID or Name, depending on the implementation. ID of directory should be always unique, but name should be unique just inside the namespace"
-      -
-        in: "path"
-        name: "record"
-        schema:
-          type: "string"
-        required: true
-        description: "Record Name or ID. Record ID is always unique, but record name can be unique inside the given directory."
-      - name: "version"
-        in: query
-        description: Version of the particular record. Default is null, in which case, latest is responded.
-        schema:
-          type: string
-
+        - in: path
+          name: namespace
+          required: true
+          description: Namespace ID or verified domain
+          schema:
+            type: string
+        - in: path
+          name: registry_name
+          required: true
+          description: Name of the registry (unique within the namespace)
+          schema:
+            type: string
+        - in: path
+          name: record_name
+          required: true
+          description: Name of the record (unique within the registry)
+          schema:
+            type: string
+        - in: query
+          name: version_id
+          required: false
+          description: Version of the record. Returns latest if not provided.
+          schema:
+            type: string
       responses:
-        200:
-          description: "Record Found"
+        '200':
+          description: Record found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RecordLookup"
-        401:
-          description: 'Unauthorized'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Resource retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      namespace:
+                        type: string
+                      namespace_id:
+                        type: string
+                      registry_id:
+                        type: string
+                      registry_name:
+                        type: string
+                      record_id:
+                        type: string
+                      record_name:
+                        type: string
+                      description:
+                        type: string
+                      digest:
+                        type: string
+                      schema:
+                        type: object
+                      version_count:
+                        type: string
+                      version:
+                        type: string
+                      details:
+                        type: object
+                      meta:
+                        type: object
+                      genesis:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      created_by:
+                        type: string
+                      is_revoked:
+                        type: boolean
+                      is_archived:
+                        type: boolean
+                      ttl:
+                        type: string
+        '400':
+          description: Missing or invalid path input
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/401Response"
-        404:
-          description: 'Record Not found'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Invalid input: record_name is missing'
+                  data:
+                    type: string
+                    nullable: true
+                    example: null
+        '401':
+          description: Unauthorized - Missing or invalid token
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/404Response"
-        423:
-          description: 'Locked'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized
+                  data:
+                    type: string
+                    nullable: true
+                    example: null
+        '404':
+          description: Record/Registry/Namespace not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/423Response"
-        451:
-          description: 'Not available for legal reasons'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: record not found
+                  data:
+                    type: string
+                    nullable: true
+                    example: null
+        '423':
+          description: Record is locked
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/451Response"
-
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Record is locked
+                  data:
+                    type: string
+                    nullable: true
+                    example: null
+        '451':
+          description: Record is unavailable for legal reasons
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Record is unavailable for legal reasons
+                  data:
+                    type: string
+                    nullable: true
+                    example: null
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: An unexpected error occurred
+                  data:
+                    type: string
+                    example: error.message
   /dedi/query/{namespace}:
     get:
       tags:
-      - "Query API"
-      description: "Get the directories inside the given namespace"
-      operationId: "queryNamespace"
+        - Query API
+      summary: Query registries in a namespace
+      description: Get all registries within the specified namespace using filters and pagination.
+      operationId: queryNamespace
       parameters:
-      -
-        in: "path"
-        name: "namespace"
-        schema:
-          type: "string"
-        required: true
-        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID"
-      - name: from
-        in: query
-        description: Filter by date. Default is directory created_at
-        schema:
-          type: string
-          format: date
-      - name: to
-        in: query
-        description: Filter by date. Default is 'now'
-        schema:
-          type: string
-          format: date
-      - name: status
-        in: query
-        description: Filter by status. Default status list - active, revoke, archive
-        schema:
-          type: string
-      - name: name
-        in: query
-        description: Filter by name. The match will happen with 'Like' operator. Minimum 3 letters, otherwise ignored.
-        schema:
-          type: string
-      - name: sort
-        in: query
-        description: Sort the results by a specified field (asc)
-        schema:
-          type: string
-          enum:
-            - date
-            - status
-            - name
-            - id
-      - name: page
-        in: query
-        description: Used in pagination. Default is 0 (i.e. first page) from the latest update.
-        schema:
-          type: number
-      - name: page_size
-        in: query
-        description: Record payload length in each get call. Default is 100.
-        schema:
-          type: number
+        - in: path
+          name: namespace
+          required: true
+          description: Namespace ID or verified domain
+          schema:
+            type: string
+        - in: query
+          name: from
+          description: Filter by creation date (from)
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: to
+          description: Filter by creation date (to)
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: status
+          description: Filter by registry status (revoked, active)
+          schema:
+            type: string
+        - in: query
+          name: name
+          description: Filter by registry name or schema text (min 3 characters)
+          schema:
+            type: string
+        - in: query
+          name: sort
+          description: Sort results by field (ascending)
+          schema:
+            type: string
+            enum:
+              - date
+              - status
+              - name
+              - id
+        - in: query
+          name: page
+          description: Page number (starts from 1)
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: page_size
+          description: Number of items per page
+          schema:
+            type: integer
+            default: 10
       responses:
-        200:
-          description: "Directories Found in Namespace"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/NamespaceQuery"
-        204:
-          description: "Namespace exists but No Directories Found matching query"
+        '200':
+          description: Registries found
           content:
             application/json:
               schema:
                 type: object
-        400:
-          description: 'Bad Request'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/400Response"
-        401:
-          description: 'Unauthorized'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/401Response"
-        402:
-          description: 'Payment Required'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/402Response"
-        404:
-          description: 'Directory Not found'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/404Response"
-        423:
-          description: 'Locked'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/423Response"
-        451:
-          description: 'Not available for legal reasons'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/451Response"
-        501:
-          description: 'Method not implemented'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/501Response"
-  /dedi/query/{namespace}/{directory}:
-    get:
-      tags:
-      - "Query API"
-      description: "Get the records matching the query within directory"
-      operationId: "queryDirectory"
-      parameters:
-      -
-        in: "path"
-        name: "namespace"
-        schema:
-          type: "string"
-        required: true
-        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID"
-      -
-        in: "path"
-        name: "directory"
-        schema:
-          type: "string"
-        required: true
-        description: "Directory ID or Name. Unique ID of the directory. Name can be an alias to ID"
-      - name: "version"
-        in: query
-        description: Version of the particular directory. Default is null, in which case, latest is responded.
-        schema:
-          type: string
-      - name: from
-        in: query
-        description: Filter by date. Default is record created_at
-        schema:
-          type: string
-          format: date
-      - name: to
-        in: query
-        description: Filter by date. Default is 'now'
-        schema:
-          type: string
-          format: date
-      - name: status
-        in: query
-        description: Filter by status. Default status list - active, revoke, archive
-        schema:
-          type: string
-      - name: name
-        in: query
-        description: Filter by name. The match will happen with 'Like' operator. Minimum 3 letters, otherwise ignored.
-        schema:
-          type: string
-      - name: sort
-        in: query
-        description: Sort the results by a specified field (asc)
-        schema:
-          type: string
-          enum:
-            - date
-            - status
-            - name
-            - id
-      - name: page
-        in: query
-        description: Used in pagination. Default is 0 (ie, first page) from the latest update.
-        schema:
-          type: number
-      - name: page_size
-        in: query
-        description: Record payload length in each get call. Default is 100.
-        schema:
-          type: number
-      responses:
-        200:
-          description: "Records Found in Directory"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DirectoryQuery"
-        204:
-          description: "Directory exists but No Records Found matching query"
+                properties:
+                  message:
+                    type: string
+                    example: Resource retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      namespace_id:
+                        type: string
+                      namespace_name:
+                        type: string
+                      created_by:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      total_registries:
+                        type: integer
+                      page_number:
+                        type: integer
+                      page_size:
+                        type: integer
+                      registries:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            registry_id:
+                              type: string
+                            registry_name:
+                              type: string
+                            digest:
+                              type: string
+                            description:
+                              type: string
+                            created_by:
+                              type: string
+                            schema:
+                              type: object
+                            meta:
+                              type: object
+                            version:
+                              type: string
+                            version_count:
+                              type: string
+                            record_count:
+                              type: string
+                            is_revoked:
+                              type: boolean
+                            is_archived:
+                              type: boolean
+                            genesis:
+                              type: string
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+                      ttl:
+                        type: integer
+                        example: 600
+        '204':
+          description: Namespace exists but no registries match query
           content:
             application/json:
               schema:
                 type: object
-        400:
-          description: 'Bad Request'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/400Response"
-        401:
-          description: 'Unauthorized'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/401Response"
-        402:
-          description: 'Payment Required'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/402Response"
-        404:
-          description: 'Directory Not found'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/404Response"
-        423:
-          description: 'Locked'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/423Response"
-        451:
-          description: 'Not available for legal reasons'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/451Response"
-        501:
-          description: 'Method not implemented'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/501Response"
-
-  /dedi/versions/{namespace}/{directory}:
-    get:
-      tags:
-      - "Version List API"
-      description: "Get the available versions of the directory."
-      operationId: "versionDirectory"
-      parameters:
-      -
-        in: "path"
-        name: "namespace"
-        schema:
-          type: "string"
-        required: true
-        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID"
-      -
-        in: "path"
-        name: "directory"
-        schema:
-          type: "string"
-        required: true
-        description: "Directory ID or Name. Unique ID of the directory. Name can be an alias to ID"
-      - name: from
-        in: query
-        description: Filter by date. Default is directory created_at
-        schema:
-          type: string
-          format: date
-      - name: to
-        in: query
-        description: Filter by date. Default is 'now'
-        schema:
-          type: string
-          format: date
-      - name: sort
-        in: query
-        description: Sort the results by a specified field (asc)
-        schema:
-          type: string
-          enum:
-            - date
-            - id
-      - name: page
-        in: query
-        description: Used in pagination. Default is 0 (ie, first page) from the latest update.
-        schema:
-          type: number
-      - name: page_size
-        in: query
-        description: Record payload length in each get call. Default is 100.
-        schema:
-          type: number
-      responses:
-        200:
-          description: "Records Found in Directory"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DirectoryVersion"
-        204:
-          description: "Directory exists but No Records Found matching query"
+                properties: {}
+        '400':
+          description: Bad request (missing namespace or bad filters)
           content:
             application/json:
               schema:
                 type: object
-        400:
-          description: 'Bad Request'
+                properties:
+                  message:
+                    type: string
+                    example: 'Invalid input: namespace is missing'
+                  data:
+                    type: string
+                    nullable: true
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/400Response"
-        401:
-          description: 'Unauthorized'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized
+                  data:
+                    type: string
+                    nullable: true
+        '402':
+          description: Payment Required
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/401Response"
-        402:
-          description: 'Payment Required'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Payment required to access resource
+                  data:
+                    type: string
+                    nullable: true
+        '404':
+          description: Namespace not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/402Response"
-        404:
-          description: 'Directory Not found'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: namespace not found
+                  data:
+                    type: string
+                    nullable: true
+        '423':
+          description: Namespace locked
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/404Response"
-        423:
-          description: 'Locked'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Namespace is locked
+                  data:
+                    type: string
+                    nullable: true
+        '451':
+          description: Unavailable for legal reasons
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/423Response"
-        451:
-          description: 'Not available for legal reasons'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unavailable for legal reasons
+                  data:
+                    type: string
+                    nullable: true
+        '500':
+          description: Unexpected error occurred
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/451Response"
-        501:
-          description: 'Method not implemented'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: An unexpected error occurred
+                  data:
+                    type: string
+                    example: error.message
+        '501':
+          description: Method not implemented
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/501Response"
-
-  /dedi/history/{namespace}/{directory}:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Not implemented
+                  data:
+                    type: string
+                    nullable: true
+  /dedi/query/{namespace}/{registry_name}:
     get:
       tags:
-      - "MetaData API"
-      description: "Get the change log of the directory, containing information about changes to directory details from the creation time along with who did the changes"
-      operationId: "getDirectoryHistory"
+        - Query API
+      summary: Query records in a registry
+      description: Get all records within the specified registry using filters and pagination.
+      operationId: queryRegistry
       parameters:
-      -
-        in: "path"
-        name: "namespace"
-        schema:
-          type: "string"
-        required: true
-        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID"
-      -
-        in: "path"
-        name: "directory"
-        schema:
-          type: "string"
-        required: true
-        description: "Directory ID or Name. Unique ID of the directory. Name can be an alias to ID"
-      - name: "version"
-        in: query
-        description: Version of the particular directory. Default is null, in which case, latest is responded.
-        schema:
-          type: string
-      - name: from
-        in: query
-        description: Filter by date. Default is directory created_at date
-        schema:
-          type: string
-          format: date
-      - name: to
-        in: query
-        description: Filter by date. Default is 'now'
-        schema:
-          type: string
-          format: date
+        - in: path
+          name: namespace
+          required: true
+          description: Namespace ID or verified domain
+          schema:
+            type: string
+        - in: path
+          name: registry_name
+          required: true
+          description: Name of the registry
+          schema:
+            type: string
+        - in: query
+          name: version
+          description: Version of the registry (optional, returns latest if not provided)
+          schema:
+            type: string
+        - in: query
+          name: from
+          description: Filter by record creation date (from)
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: to
+          description: Filter by record creation date (to)
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: status
+          description: Filter by record status (`active`, `revoked`)
+          schema:
+            type: string
+        - in: query
+          name: name
+          description: Filter by record name or details (min 3 characters)
+          schema:
+            type: string
+        - in: query
+          name: sort
+          description: Sort by `date`, `status`, `name`, or `id` (ascending)
+          schema:
+            type: string
+            enum:
+              - date
+              - status
+              - name
+              - id
+        - in: query
+          name: page
+          description: Page number (starts from 1)
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: page_size
+          description: Number of items per page
+          schema:
+            type: integer
+            default: 10
       responses:
-        200:
-          description: "Successful in getting history"
+        '200':
+          description: Records found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DirectoryHistoryLookup"
-        401:
-          description: 'Unauthorized'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Resource retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      namespace_id:
+                        type: string
+                      namespace_name:
+                        type: string
+                      registry_id:
+                        type: string
+                      registry_name:
+                        type: string
+                      created_by:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      schema:
+                        type: object
+                      meta:
+                        type: object
+                      total_records:
+                        type: integer
+                      total_pages:
+                        type: integer
+                      page_number:
+                        type: integer
+                      page_size:
+                        type: integer
+                      records:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            record_id:
+                              type: string
+                            record_name:
+                              type: string
+                            description:
+                              type: string
+                            digest:
+                              type: string
+                            details:
+                              type: object
+                            meta:
+                              type: object
+                            version:
+                              type: string
+                            version_count:
+                              type: string
+                            created_by:
+                              type: string
+                            genesis:
+                              type: string
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+                            is_revoked:
+                              type: boolean
+                            is_archived:
+                              type: boolean
+                      ttl:
+                        type: integer
+                        example: 600
+        '204':
+          description: Registry exists but no records match query
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/401Response"
-        404:
-          description: 'Directory Not found'
+                type: object
+                properties: {}
+        '400':
+          description: Bad Request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/404Response"
-        423:
-          description: 'Locked'
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: string
+                    nullable: true
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/423Response"
-        451:
-          description: 'Not available for legal reasons'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized
+                  data:
+                    type: string
+                    nullable: true
+        '402':
+          description: Payment Required
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/451Response"
-        501:
-          description: 'Method not implemented'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Payment required
+                  data:
+                    type: string
+                    nullable: true
+        '404':
+          description: Registry or namespace not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/501Response"
-
-  /dedi/history/{namespace}/{directory}/{record}:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Registry not found or not active
+                  data:
+                    type: string
+                    nullable: true
+        '423':
+          description: Locked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Locked
+                  data:
+                    type: string
+                    nullable: true
+        '451':
+          description: Not available for legal reasons
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unavailable for legal reasons
+                  data:
+                    type: string
+                    nullable: true
+        '500':
+          description: Unexpected error occurred
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: An unexpected error occurred
+                  data:
+                    type: string
+                    example: error.message
+        '501':
+          description: Method not implemented
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Not implemented
+                  data:
+                    type: string
+                    nullable: true
+  /dedi/versions/{namespace}:
     get:
       tags:
-      - "MetaData API"
-      description: "Get the historic details of the record along with authorship"
-      operationId: "getRecordHistory"
+        - Version API
+      summary: Get all versions of a specific namespace
+      description: Returns all available versions of a namespace.
+      operationId: getNamespaceVersions
       parameters:
-      -
-        in: "path"
-        name: "namespace"
-        schema:
-          type: "string"
-        required: true
-        description: "Namespace ID or Name. Unique ID of the namespace. Name can be an alias to ID"
-      -
-        in: "path"
-        name: "directory"
-        schema:
-          type: "string"
-        required: true
-        description: "Directory ID or Name. Unique ID of the directory. Name can be an alias to ID"
-      -
-        in: "path"
-        name: "record"
-        schema:
-          type: "string"
-        required: true
-        description: "Record ID or Name. Unique ID of the record. Name can be an alias to ID"
-      - name: from
-        in: query
-        description: Filter by date. Default is directory created_at
-        schema:
-          type: string
-          format: date
-      - name: to
-        in: query
-        description: Filter by date. Default is 'now'
-        schema:
-          type: string
-          format: date
+        - in: path
+          name: namespace
+          required: true
+          description: Namespace ID or verified domain
+          schema:
+            type: string
       responses:
-        200:
-          description: "Successful in getting history"
+        '200':
+          description: Namespace version list retrieved successfully
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/RecordHistoryLookup"
-        401:
-          description: 'Unauthorized'
+              example:
+                message: Resource retrieved successfully
+                data:
+                  created_by: example@example.com
+                  created_at: '2024-01-01T00:00:00.000Z'
+                  updated_at: '2024-07-08T10:00:00.000Z'
+                  total_versions: 1
+                  versions:
+                    - string
+                  ttl: 600
+        '400':
+          description: 'Invalid input: namespace is missing'
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/401Response"
-        404:
-          description: 'Directory or Record Not found'
+              example:
+                message: 'Invalid input: namespace is missing'
+                data: null
+        '401':
+          description: Unauthorized
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/404Response"
-        423:
-          description: 'Locked'
+              example:
+                message: Unauthorized
+                data: null
+        '404':
+          description: Namespace not found
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/423Response"
-        451:
-          description: 'Not available for legal reasons'
+              example:
+                message: namespace not found
+                data: null
+        '500':
+          description: Unexpected error
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/451Response"
-        501:
-          description: 'Method not implemented'
+              example:
+                message: An unexpected error occurred
+                data: Some error message
+  /dedi/versions/{namespace}/{registry_name}:
+    get:
+      tags:
+        - Version API
+      summary: Get all versions of a specific registry
+      description: Returns all available versions of a registry within the namespace.
+      operationId: getRegistryVersions
+      parameters:
+        - in: path
+          name: namespace
+          required: true
+          description: Namespace ID or verified domain
+          schema:
+            type: string
+        - in: path
+          name: registry_name
+          required: true
+          description: Name of the registry
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Registry version list retrieved successfully
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/501Response"
-
+              example:
+                message: Resource retrieved successfully
+                data:
+                  registry_name: example-registry
+                  created_by: admin@example.com
+                  schema:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      age:
+                        type: number
+                  created_at: '2024-01-01T00:00:00.000Z'
+                  updated_at: '2024-07-08T12:34:56.000Z'
+                  total_versions: 1
+                  versions:
+                    - string
+                  ttl: 600
+        '400':
+          description: Invalid input or missing parameters
+          content:
+            application/json:
+              examples:
+                missing_namespace:
+                  value:
+                    message: 'Invalid input: namespace is missing'
+                    data: null
+                missing_registry:
+                  value:
+                    message: 'Invalid input: registry_name is missing'
+                    data: null
+                namespace_not_found:
+                  value:
+                    message: namespace not found
+                registry_not_found:
+                  value:
+                    message: registry not found
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+                data: null
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              example:
+                message: An unexpected error occurred
+                data: Some error message
+  /dedi/versions/{namespace}/{registry_name}/{record_name}:
+    get:
+      tags:
+        - Version API
+      summary: Get all versions of a specific record
+      description: Returns all available versions of a record within a registry and namespace.
+      operationId: getRecordVersions
+      parameters:
+        - in: path
+          name: namespace
+          required: true
+          description: Namespace ID or verified domain
+          schema:
+            type: string
+        - in: path
+          name: registry_name
+          required: true
+          description: Name of the registry
+          schema:
+            type: string
+        - in: path
+          name: record_name
+          required: true
+          description: Name of the record
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Record version list retrieved successfully
+          content:
+            application/json:
+              example:
+                message: Resource retrieved successfully
+                data:
+                  created_by: admin@example.com
+                  schema:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      age:
+                        type: number
+                  created_at: '2024-01-01T00:00:00.000Z'
+                  updated_at: '2024-07-08T12:34:56.000Z'
+                  total_versions: 1
+                  versions:
+                    - string
+                  ttl: 600
+        '400':
+          description: Invalid input or missing parameters
+          content:
+            application/json:
+              examples:
+                missing_namespace:
+                  value:
+                    message: 'Invalid input: namespace is missing'
+                    data: null
+                missing_registry:
+                  value:
+                    message: 'Invalid input: registry_name is missing'
+                    data: null
+                missing_record:
+                  value:
+                    message: 'Invalid input: record_name is missing'
+                    data: null
+                namespace_not_found:
+                  value:
+                    message: namespace not found
+                registry_not_found:
+                  value:
+                    message: registry not found
+                record_not_found:
+                  value:
+                    message: record not found
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+                data: null
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              example:
+                message: An unexpected error occurred
+                data: Some error message
 components:
-  schemas:
-    NamespaceLookup:
-      type: object
-      description: "Namespace Lookup"
-      properties:
-        namespace:
-          type: string
-        namespace_id:
-          type: string
-        digest:
-          type: string
-        description:
-          type: string
-        created_by:
-          type: string
-        created_at:
-          type: string
-        updated_at:
-          type: string
-        directory_count:
-          type: number
-
-    DirectoryLookup:
-      type: object
-      description: "Directory Lookup"
-      properties:
-        namespace:
-          type: string
-        namespace_id:
-          type: string
-        directory_id:
-          type: string
-        directory_name:
-          type: string
-        digest:
-          type: string
-        description:
-          type: string
-        created_by:
-          type: string
-        schema:
-          type: object
-        created_at:
-          type: string
-        updated_at:
-          type: string
-        record_count:
-          type: number
-        version_count:
-          type: number
-        query_allowed:
-          type: boolean
-          description: "only lookup allowed"
-      required:
-        - directory_id
-        - digest
-        - created_by
-        - schema
-        - created_at
-        - updated_at
-
-    NamespaceQuery:
-      type: object
-      description: "Namespace Query"
-      properties:
-        created_by:
-          type: string
-        created_at:
-          type: string
-        updated_at:
-          type: string
-        total_directories:
-          type: number
-        directories:
-          type: array
-          items:
-            type: object
-        page:
-          type: number
-        page_size:
-          type: number
-      required:
-        - created_by
-        - digest
-        - schema
-        - created_at
-        - updated_at
-        - directories
-
-    DirectoryQuery:
-      type: object
-      description: "Directory Query"
-      properties:
-        created_by:
-          type: string
-        schema:
-          type: object
-        created_at:
-          type: string
-        updated_at:
-          type: string
-        total_records:
-          type: number
-        records:
-          type: array
-          items:
-            type: object
-        page:
-          type: number
-        page_size:
-          type: number
-      required:
-        - created_by
-        - schema
-        - created_at
-        - updated_at
-        - records
-
-
-    DirectoryVersion:
-      type: object
-      description: "Directory Version List"
-      properties:
-        created_by:
-          type: string
-        schema:
-          type: object
-        created_at:
-          type: string
-        total_versions:
-          type: number
-        versions:
-          type: array
-          items:
-            type: object
-        page:
-          type: number
-        page_size:
-          type: number
-      required:
-        - created_by
-        - schema
-        - created_at
-        - versions
-
-    DirectoryHistoryLookup:
-      type: object
-      description: "Directory History"
-      properties:
-        namespace_id:
-          type: string
-        namespace_name:
-          type: string
-        description:
-          type: string
-        created_by:
-          type: string
-        schema:
-          type: object
-        created_at:
-          type: string
-        updated_at:
-          type: string
-        record_count:
-          type: number
-        history:
-          type: array
-          items:
-            type: object
-
-    RecordLookup:
-      type: object
-      description: "Record Lookup"
-      properties:
-        namespace:
-          type: string
-        namespace_id:
-          type: string
-        directory_id:
-          type: string
-        directory_name:
-          type: string
-        record_id:
-          type: string
-        record_name:
-          type: string
-        digest:
-          type: string
-        description:
-          type: string
-        schema:
-          type: object
-          description: "Schema of this record (as per the directory) in property name as key, and data type as value"
-        details:
-          description: "Object in key value pairs in the dictionary based on schema"
-          type: object
-        created_at:
-          type: string
-        last_updated_at:
-          type: string
-        created_by:
-          type: string
-      required:
-        - record_id
-        - details
-        - created_at
-        - created_by
-  
-    RecordHistoryLookup:
-      type: object
-      description: "Record History"
-      properties:
-        description:
-          type: string
-        details:
-          type: string
-        created_at:
-          type: string
-        created_by:
-          type: string
-        history:
-          type: object
-  
-    400Response:
-      type: object
-      description: "Bad Request"
-      properties:
-        error:
-          type: string
-          example: "Query Parameters not well formatted"
-    401Response:
-      type: object
-      description: "Unauthorized. May not be applicable in case of Public directory, but applicable in case of private directories."
-      properties:
-        description:
-          type: string
-          example: "This call doesn't contain required Authorization details"
-    402Response:
-      type: object
-      description: "Payment Required. May not be applicable in case of a public directory, but service provider can provide payment feature to access verification"
-      properties:
-        error:
-          type: string
-          example: "Payment details required to access the details"
-    404Response:
-      type: object
-      description: "Object not found"
-      properties:
-        error:
-          type: string
-          example: "{directory} not found"
-    423Response:
-      type: object
-      description: "Locked"
-      properties:
-        error:
-          type: string
-          example: "Locked by the Directory Creator. Contact Maintainer for further details."
-    451Response:
-      type: object
-      description: "Unavailable for Legal Reasons"
-      properties:
-        error:
-          type: string
-          example: "Data not resolved due to legal reasons. Contact Maintainer for further details."
-    501Response:
-      type: object
-      description: "Method Not Implemented"
-      properties:
-        description:
-          type: string
-          example: "The call is not implemented. Check with service provider."
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
