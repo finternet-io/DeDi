@@ -1,6 +1,6 @@
 {
     "$id": "https://dedi.global/membership.json",
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "description": "Membership. This schema is used to establish membership of person/entity to a club, an entity in a larger consortium, or even can be citizenship of a country. Think of this as 'Affiliation'",
     "type": "object",
     "properties": {
@@ -10,12 +10,12 @@
 	},
 	"detail": {
 	    "type": "object",
-	    "description": "Public details of the member"
+	    "description": "Public details of the member",
 	    "properties": {
 		"name": { "type": "string" },
-		"url": { "type": "string", "format": "url"},
+		"url": { "type": "string", "format": "uri"},
 		"address": { "type": "string" },
-		"publicKey": { "type": "string", "description": "this can be a url/uri pointing to DeDi public key registry entry, or even DID" },
+		"publicKey": { "type": "string", "description": "this can be a url/uri pointing to DeDi public key registry entry, or even DID" }
 	    },
 	    "required": ["name"],
 	    "additionalProperties": true,
@@ -33,8 +33,5 @@
 	    "format": "date"
 	}
     },
-    "required": [ "id", "detail"],
-    "dependentRequired": {
-	"detail": [ "name" ],
-    }
+    "required": [ "id", "detail"]
 }
