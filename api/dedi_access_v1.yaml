@@ -130,7 +130,7 @@ paths:
         description: "Record Name or ID. Record ID is always unique, but record name can be unique inside the given directory."
       - name: "version"
         in: query
-        description: Version of the particular record. Default is null, in which case, lastest is responded.
+        description: Version of the particular record. Default is null, in which case, latest is responded.
         schema:
           type: string
 
@@ -214,7 +214,7 @@ paths:
             - id
       - name: page
         in: query
-        description: Used in pagination. Default is 0 (i.e. first page) from latest updated.
+        description: Used in pagination. Default is 0 (i.e. first page) from the latest update.
         schema:
           type: number
       - name: page_size
@@ -300,7 +300,7 @@ paths:
         description: "Directory ID or Name. Unique ID of the directory. Name can be an alias to ID"
       - name: "version"
         in: query
-        description: Version of the particular directory. Default is null, in which case, lastest is responded.
+        description: Version of the particular directory. Default is null, in which case, latest is responded.
         schema:
           type: string
       - name: from
@@ -337,7 +337,7 @@ paths:
             - id
       - name: page
         in: query
-        description: Used in pagination. Default is 0 (ie, first page) from latest updated.
+        description: Used in pagination. Default is 0 (ie, first page) from the latest update.
         schema:
           type: number
       - name: page_size
@@ -444,7 +444,7 @@ paths:
             - id
       - name: page
         in: query
-        description: Used in pagination. Default is 0 (ie, first page) from latest updated.
+        description: Used in pagination. Default is 0 (ie, first page) from the latest update.
         schema:
           type: number
       - name: page_size
@@ -512,7 +512,7 @@ paths:
     get:
       tags:
       - "MetaData API"
-      description: "Get the change log of the directory, containing information about changes to directory details from the creation time along with who did the chagnes"
+      description: "Get the change log of the directory, containing information about changes to directory details from the creation time along with who did the changes"
       operationId: "getDirectoryHistory"
       parameters:
       -
@@ -531,7 +531,7 @@ paths:
         description: "Directory ID or Name. Unique ID of the directory. Name can be an alias to ID"
       - name: "version"
         in: query
-        description: Version of the particular directory. Default is null, in which case, lastest is responded.
+        description: Version of the particular directory. Default is null, in which case, latest is responded.
         schema:
           type: string
       - name: from
