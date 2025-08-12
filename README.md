@@ -2,8 +2,9 @@
 
 ## The Problem: Slow, Expensive Verification. High-cost of establishing trust!
 
-> DeDi solves costly verification problems. Businesses spend time and resources checking if documents, credentials, and data are valid. DeDi creates a universal way to verify public information instantly. 
+> DeDi solves costly verification problems. Businesses spend time and resources checking if documents, credentials, and data are valid. DeDi creates a universal way to verify public information instantly.
 
+> DeDi enables discovery of public keys, of up-to-date revocation lists, membership lists, sanctions list and other such positive/negative lists published by the sources of truth, making it easy to establish trust in the agentic AI world!
 
 Every day, people carry out millions of digital transactions, which underpin the global economy. Trust, enabled by secure, interoperable, and efficient digital systems, serves as the foundation of this massive digital economy.
 
